@@ -30,21 +30,16 @@ To use this server, add its configuration to your MCP settings file.
 {
   "mcpServers": {
     "git-commit-aider": {
-      "command": "node",
-      "args": [
-        "/path/to/git-commit-aider/build/index.js"
-      ],
-      "env": {
-        "GIT_COMMITTER_NAME": "Your Name",
-        "GIT_COMMITTER_EMAIL": "your.email@example.com"
-      },
-      "disabled": false,
-      "alwaysAllow": []
+      "command": "npx",
+      "args": ["mcp-git-commit-aider"]
     }
   }
 }
 ```
-*(Replace `/path/to/git-commit-aider` with the actual path to this server directory. Set `GIT_COMMITTER_NAME` and `GIT_COMMITTER_EMAIL` if you want to override the Git config.)*
+
+The committer information is retrieved from:
+1. Environment variables `GIT_COMMITTER_NAME` and `GIT_COMMITTER_EMAIL`, which follows [git's convention](https://git-scm.com/book/en/v2/Git-Internals-Environment-Variables).
+2. Output of `git config user.name` and `git config user.email` commands.
 
 ## Development
 
@@ -62,6 +57,21 @@ For development with auto-rebuild:
 ```bash
 npm run watch
 ```
+
+Sample MCP config:
+```json
+{
+  "mcpServers": {
+    "git-commit-aider": {
+      "command": "node",
+      "args": [
+        "/path/to/git-commit-aider/build/index.js"
+      ]
+    }
+  }
+}
+```
+*(Replace `/path/to/git-commit-aider` with the actual path to this server directory.)*
 
 ## Debugging
 
