@@ -6,29 +6,21 @@ This is a TypeScript-based MCP server that provides a tool to commit staged chan
 
 ## Features
 
-### Tools
-- `commit_staged` - Commit staged changes with a specific message.
-  - Takes `message` (string, required) as the commit message.
-  - Takes `cwd` (string, optional) to specify the working directory for the git command.
-  - Appends "(aider)" to the committer name automatically.
-  - Reads committer name and email from environment variables (`GIT_COMMITTER_NAME`, `GIT_COMMITTER_EMAIL`) if set, otherwise falls back to `git config user.name` and `git config user.email`.
+This MCP server provides only one tool:
 
-## Development
+`commit_staged` - Commit staged changes with a specific message.
+- Takes `message` (string, required) as the commit message.
+- Takes `cwd` (string, optional) to specify the working directory for the git command.
+- Appends "(aider)" to the committer name automatically.
+- Reads committer name and email from environment variables (`GIT_COMMITTER_NAME`, `GIT_COMMITTER_EMAIL`) if set, otherwise falls back to `git config user.name` and `git config user.email`.
 
-Install dependencies:
-```bash
-npm install
-```
+With this tool installed in your code editor, you can prompt the AI by something like:
 
-Build the server:
-```bash
-npm run build
-```
+> Commit the changes for me
 
-For development with auto-rebuild:
-```bash
-npm run watch
-```
+This usually happens after the AI has made some changes to your codebase, so often times AI is able to provide a good commit message from the context.
+
+Commits with "(aider)" can be picked up by [`aider --stats`](https://github.com/Aider-AI/aider/pull/2883) command, which will show you the contribution of AI in your codebase.
 
 ## Installation
 
@@ -53,6 +45,23 @@ To use this server, add its configuration to your MCP settings file.
 }
 ```
 *(Replace `/path/to/git-commit-aider` with the actual path to this server directory. Set `GIT_COMMITTER_NAME` and `GIT_COMMITTER_EMAIL` if you want to override the Git config.)*
+
+## Development
+
+Install dependencies:
+```bash
+npm install
+```
+
+Build the server:
+```bash
+npm run build
+```
+
+For development with auto-rebuild:
+```bash
+npm run watch
+```
 
 ## Debugging
 
