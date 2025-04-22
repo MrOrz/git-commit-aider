@@ -5,14 +5,14 @@
   "private": true,
   "type": "module",
   "bin": {
-    "mcp-git-commit-aider": "./build/index.js"
+    "mcp-git-commit-aider": "build/index.js"
   },
   "files": [
     "build"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/MrOrz/mcp-git-commit-aider.git"
+    "url": "git+https://github.com/MrOrz/mcp-git-commit-aider.git"
   },
   "scripts": {
     "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
