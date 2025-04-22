@@ -1,5 +1,5 @@
 {
-  "name": "git-commit-aider",
+  "name": "mcp-git-commit-aider",
   "version": "0.1.0",
   "description": "Make git commits on behave of AI, so that you can track AI contribution in your codebase",
   "private": true,
