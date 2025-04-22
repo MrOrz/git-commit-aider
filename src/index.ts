@@ -75,7 +75,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 
     const { message, cwd } = request.params.arguments;
-    const executionOptions = cwd ? { cwd } : {};
+    const executionOptions = { cwd: cwd || '' };
 
     try {
         let committerName: string;
