@@ -78,15 +78,61 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const executionOptions = cwd ? { cwd } : {};
 
     try {
-        // Get original git user name and email
-        const { stdout: originalName } = await execa('git', ['config', 'user.name'], executionOptions);
-        const { stdout: originalEmail } = await execa('git', ['config', 'user.email'], executionOptions);
+        let committerName: string;
+        let committerEmail: string;
+
+        // Get committer name: prioritize env var, fallback to git config
+        const envName = process.env.GIT_COMMITTER_NAME;
+        if (envName) {
+            committerName = envName;
+            console.error('Using committer name from environment variable.');
+        } else {
+            console.error('GIT_COMMITTER_NAME not set, falling back to git config user.name.');
+            try {
+                const { stdout: nameOutput } = await execa('git', ['config', 'user.name'], executionOptions);
+                committerName = nameOutput.trim();
+                if (!committerName) {
+                    throw new Error('Git user.name is empty.');
+                }
+                console.error(`Using committer name from git config: ${committerName}`);
+            } catch (configError: any) {
+                const configErrorMessage = configError?.stderr || configError?.stdout || configError?.shortMessage || configError?.message || 'Unknown error getting git config user.name.';
+                throw new McpError(
+                    ErrorCode.InternalError,
+                    `Failed to get git user.name: ${configErrorMessage}. Please ensure git user.name is configured or set the GIT_COMMITTER_NAME environment variable.`
+                );
+            }
+        }
+
+        // Get committer email: prioritize env var, fallback to git config
+        const envEmail = process.env.GIT_COMMITTER_EMAIL;
+        if (envEmail) {
+            committerEmail = envEmail;
+            console.error('Using committer email from environment variable.');
+        } else {
+            console.error('GIT_COMMITTER_EMAIL not set, falling back to git config user.email.');
+            try {
+                const { stdout: emailOutput } = await execa('git', ['config', 'user.email'], executionOptions);
+                committerEmail = emailOutput.trim();
+                 if (!committerEmail) {
+                    throw new Error('Git user.email is empty.');
+                }
+                console.error(`Using committer email from git config: ${committerEmail}`);
+            } catch (configError: any) {
+                const configErrorMessage = configError?.stderr || configError?.stdout || configError?.shortMessage || configError?.message || 'Unknown error getting git config user.email.';
+                 throw new McpError(
+                    ErrorCode.InternalError,
+                    `Failed to get git user.email: ${configErrorMessage}. Please ensure git user.email is configured or set the GIT_COMMITTER_EMAIL environment variable.`
+                );
+            }
+        }
 
         // Construct the aider committer string
-        const aiderName = `${originalName.trim()} (aider)`;
-        const authorString = `${aiderName} <${originalEmail.trim()}>`;
+        const aiderName = `${committerName} (aider)`;
+        const authorString = `${aiderName} <${committerEmail}>`;
 
         // Execute the git commit command
+        console.error(`Executing: git commit -m "${message}" --author="${authorString}"`);
         const { stdout, stderr } = await execa(
             'git',
             ['commit', '-m', message, `--author=${authorString}`],
@@ -102,7 +148,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             ],
         };
     } catch (error: any) {
-         // Check if it's an execa error
+         // Handle McpError specifically if thrown from git config fallback
+         if (error instanceof McpError) {
+             return {
+                 content: [{ type: 'text', text: error.message }],
+                 isError: true,
+             };
+         }
+
+         // Handle other errors (likely from the commit command itself)
          const errorMessage = error?.stderr || error?.stdout || error?.shortMessage || error?.message || 'Unknown error during git commit.';
          // Check for specific git errors like "nothing to commit"
          if (errorMessage.includes('nothing to commit, working tree clean') || errorMessage.includes('no changes added to commit')) {
