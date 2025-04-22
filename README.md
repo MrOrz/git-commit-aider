@@ -1,29 +1,17 @@
 # git-commit-aider MCP Server
 
-Make git commits on behave of AI, so that you can track AI contribution in your codebase
+Make git commits on behalf of AI, so that you can track AI contribution in your codebase.
 
-This is a TypeScript-based MCP server that implements a simple notes system. It demonstrates core MCP concepts by providing:
-
-- Resources representing text notes with URIs and metadata
-- Tools for creating new notes
-- Prompts for generating summaries of notes
+This is a TypeScript-based MCP server that provides a tool to commit staged changes in a Git repository while appending "(aider)" to the committer's name.
 
 ## Features
 
-### Resources
-- List and access notes via `note://` URIs
-- Each note has a title, content and metadata
-- Plain text mime type for simple content access
-
 ### Tools
-- `create_note` - Create new text notes
-  - Takes title and content as required parameters
-  - Stores note in server state
-
-### Prompts
-- `summarize_notes` - Generate a summary of all stored notes
-  - Includes all note contents as embedded resources
-  - Returns structured prompt for LLM summarization
+- `commit_staged` - Commit staged changes with a specific message.
+  - Takes `message` (string, required) as the commit message.
+  - Takes `cwd` (string, optional) to specify the working directory for the git command.
+  - Appends "(aider)" to the committer name automatically.
+  - Reads committer name and email from environment variables (`GIT_COMMITTER_NAME`, `GIT_COMMITTER_EMAIL`) if set, otherwise falls back to `git config user.name` and `git config user.email`.
 
 ## Development
 
@@ -44,22 +32,29 @@ npm run watch
 
 ## Installation
 
-To use with Claude Desktop, add the server config:
-
-On MacOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
+To use this server, add its configuration to your MCP settings file.
 
 ```json
 {
   "mcpServers": {
     "git-commit-aider": {
-      "command": "/path/to/git-commit-aider/build/index.js"
+      "command": "node",
+      "args": [
+        "/path/to/git-commit-aider/build/index.js"
+      ],
+      "env": {
+        "GIT_COMMITTER_NAME": "Your Name",
+        "GIT_COMMITTER_EMAIL": "your.email@example.com"
+      },
+      "disabled": false,
+      "alwaysAllow": []
     }
   }
 }
 ```
+*(Replace `/path/to/git-commit-aider` with the actual path to this server directory. Set `GIT_COMMITTER_NAME` and `GIT_COMMITTER_EMAIL` if you want to override the Git config.)*
 
-### Debugging
+## Debugging
 
 Since MCP servers communicate over stdio, debugging can be challenging. We recommend using the [MCP Inspector](https://github.com/modelcontextprotocol/inspector), which is available as a package script:
 
