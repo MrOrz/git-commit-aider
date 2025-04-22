@@ -10,6 +10,10 @@
   "files": [
     "build"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MrOrz/git-commit-aider.git"
+  },
   "scripts": {
     "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
     "prepare": "npm run build",
