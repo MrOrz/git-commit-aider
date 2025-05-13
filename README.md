@@ -51,6 +51,18 @@ git commit --amend --author="$(git config user.name) (aider) <$(git config user.
 
 This will change the author of the last commit to your name with "(aider)" appended.
 
+To simplify the process, you can set up a Git alias. Run the following command in your terminal:
+
+```sh
+git config --global alias.aimend '!git commit --amend --author="$(git config user.name) (aider) <$(git config user.email)>"'
+```
+
+Once set up, you can use the alias by running:
+
+```sh
+git aimend
+```
+
 ## Calculating AI contribution
 
 Commits with "(aider)" can be picked up by [`aider --stats`](https://github.com/Aider-AI/aider/pull/2883) command, which will show you the contribution of AI in your codebase.
@@ -60,7 +72,7 @@ Alternatively, you can use the following script to calculate the contribution of
 ```sh
 #!/bin/bash
 
-# Script to calculate line changes (added, deleted, total) by AI and non-AI authors
+# Script to calculate line changes (added, deleted, total) by AI and human authors
 # between two commits.
 # Output is in JSON format.
 #
@@ -117,8 +129,8 @@ result_json=$(echo "$git_log_output" | awk -v ai_matcher="$AI_MATCHER" '
 BEGIN {
   ai_added = 0
   ai_deleted = 0
-  non_ai_added = 0
-  non_ai_deleted = 0
+  human_added = 0
+  human_deleted = 0
   current_author = ""
   is_ai_author = 0
 }
@@ -149,22 +161,27 @@ NF == 0 || !($1 ~ /^[0-9]+$/ && $2 ~ /^[0-9]+$/) {
     next
   }
 
-  # Lock file filtering is now done by git log pathspec,
-  # so no need for awk to filter filenames here.
+  # Aggregate stats per author and file for details array
+  file_name = $3
+  # Robust key using File Separator character \034
+  key = current_author "\034" file_name
+
+  file_author_added[key] += added_lines
+  file_author_deleted[key] += deleted_lines
 
   if (is_ai_author) {
     ai_added += added_lines
     ai_deleted += deleted_lines
   } else {
-    non_ai_added += added_lines
-    non_ai_deleted += deleted_lines
+    human_added += added_lines
+    human_deleted += deleted_lines
   }
 }
 
 END {
   ai_total_changed = ai_added + ai_deleted
-  non_ai_total_changed = non_ai_added + non_ai_deleted
-  overall_total_changed = ai_total_changed + non_ai_total_changed
+  human_total_changed = human_added + human_deleted
+  overall_total_changed = ai_total_changed + human_total_changed
   ai_percentage = 0.00
 
   if (overall_total_changed > 0) {
@@ -173,16 +190,40 @@ END {
 
   printf "{\n"
   printf "  \"ai_percentage\": %.2f,\n", ai_percentage
-  printf "  \"ai_changes\": {\n"
-  printf "    \"added\": %d,\n", ai_added
-  printf "    \"deleted\": %d,\n", ai_deleted
-  printf "    \"total\": %d\n", ai_total_changed
-  printf "  },\n"
-  printf "  \"non_ai_changes\": {\n"
-  printf "    \"added\": %d,\n", non_ai_added
-  printf "    \"deleted\": %d,\n", non_ai_deleted
-  printf "    \"total\": %d\n", non_ai_total_changed
-  printf "  }\n"
+  printf "  \"ai_changes\": {\"added\": %d, \"deleted\": %d, \"total\": %d},\n", ai_added, ai_deleted, ai_total_changed
+  printf "  \"human_changes\": {\"added\": %d, \"deleted\": %d, \"total\": %d},\n", human_added, human_deleted, human_total_changed
+
+  # Details array
+  printf "  \"details\": [\n"
+  first_detail = 1
+  # Iterate over one of the arrays, keys should be consistent
+  for (key in file_author_added) {
+    if (!first_detail) {
+      printf ",\n"
+    }
+    first_detail = 0
+
+    # Split key "author\034fileName" into key_parts array
+    # key_parts[1] will be author, key_parts[2] will be fileName
+    split(key, key_parts, "\034")
+    author = key_parts[1]
+    fileName = key_parts[2]
+
+    # Escape double quotes for JSON compatibility
+    gsub(/"/, "\\\"", author)
+    gsub(/"/, "\\\"", fileName)
+
+    detail_added = file_author_added[key] + 0 # Ensure numeric
+    detail_deleted = file_author_deleted[key] + 0 # Ensure numeric
+    detail_total = detail_added + detail_deleted
+
+    printf "    {\n"
+    printf "      \"fileName\": \"%s\",\n", fileName
+    printf "      \"author\": \"%s\", \"isAI\": %s,\n", author, (index(author, ai_matcher) > 0 ? "true" : "false")
+    printf "      \"added\": %d, \"deleted\": %d, \"total\": %d\n", detail_added, detail_deleted, detail_total
+    printf "    }"
+  }
+  printf "\n  ]\n"
   printf "}\n"
 }
 ')
@@ -211,15 +252,37 @@ Usage example:
 # Example output (will vary based on your repository and range):
 # {
 #   "ai_percentage": 48.53,
-#   "ai_changes": {
-#     "added": 100,
-#     "deleted": 32,
-#     "total": 132
-#   },
-#   "non_ai_changes": {
-#     "added": 103,
-#     "deleted": 37,
-#     "total": 140
-#   }
+#   "ai_changes": { "added": 100, "deleted": 32, "total": 132 },
+#   "human_changes": { "added": 103, "deleted": 37, "total": 140 },
+#   "details": [
+#     {
+#       "fileName": "src/featureA.js",
+#       "author": "Developer One (aider)", "isAI": true,
+#       "added": 60, "deleted": 10, "total": 70
+#     },
+#     {
+#       "fileName": "src/featureB.js",
+#       "author": "Developer One (aider)", "isAI": true,
+#       "added": 40, "deleted": 22, "total": 62
+#     },
+#     {
+#       "fileName": "src/utils.js",
+#       "author": "Developer Two", "isAI": false,
+#       "added": 80, "deleted": 15, "total": 95
+#     },
+#     {
+#       "fileName": "README.md",
+#       "author": "Developer Two", "isAI": false,
+#       "added": 23, "deleted": 22, "total": 45
+#     }
+#   ]
 # }
 ```
+### Output Fields Description
+
+The JSON output contains the following fields:
+
+-   `ai_percentage`: (Number) The percentage of total lines changed (sum of added and deleted lines) that were contributed by AI authors (identified by `AI_MATCHER`).
+-   `ai_changes`: (Object) An object detailing the aggregated line changes (lines `added`, `deleted`, and their `total`) made by AI authors.
+-   `human_changes`: (Object) An object detailing the aggregated line changes (lines `added`, `deleted`, and their `total`) made by human authors.
+-   `details`: (Array of Objects) Provides a detailed breakdown of changes. Each object in the array represents the contribution of a specific `author` to a particular `fileName`, including lines `added`, `deleted`, and the `total` changes for that file by that author.
