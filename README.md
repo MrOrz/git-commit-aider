@@ -178,16 +178,8 @@ END {
 
   printf "{\n"
   printf "  \"ai_percentage\": %.2f,\n", ai_percentage
-  printf "  \"ai_changes\": {\n"
-  printf "    \"added\": %d,\n", ai_added
-  printf "    \"deleted\": %d,\n", ai_deleted
-  printf "    \"total\": %d\n", ai_total_changed
-  printf "  },\n"
-  printf "  \"human_changes\": {\n"
-  printf "    \"added\": %d,\n", human_added
-  printf "    \"deleted\": %d,\n", human_deleted
-  printf "    \"total\": %d\n", human_total_changed
-  printf "  },\n" # Comma added for "details"
+  printf "  \"ai_changes\": {\"added\": %d, \"deleted\": %d, \"total\": %d},\n", ai_added, ai_deleted, ai_total_changed
+  printf "  \"human_changes\": {\"added\": %d, \"deleted\": %d, \"total\": %d},\n", human_added, human_deleted, human_total_changed
 
   # Details array
   printf "  \"details\": [\n"
@@ -216,9 +208,7 @@ END {
     printf "    {\n"
     printf "      \"fileName\": \"%s\",\n", fileName
     printf "      \"author\": \"%s\",\n", author
-    printf "      \"added\": %d,\n", detail_added
-    printf "      \"deleted\": %d,\n", detail_deleted
-    printf "      \"total\": %d\n", detail_total
+    printf "      \"added\": %d, \"deleted\": %d, \"total\": %d\n", detail_added, detail_deleted, detail_total
     printf "    }"
   }
   printf "\n  ]\n"
@@ -250,44 +240,28 @@ Usage example:
 # Example output (will vary based on your repository and range):
 # {
 #   "ai_percentage": 48.53,
-#   "ai_changes": {
-#     "added": 100,
-#     "deleted": 32,
-#     "total": 132
-#   },
-#   "human_changes": {
-#     "added": 103,
-#     "deleted": 37,
-#     "total": 140
-#   },
+#   "ai_changes": { "added": 100, "deleted": 32, "total": 132 },
+#   "human_changes": { "added": 103, "deleted": 37, "total": 140 },
 #   "details": [
 #     {
 #       "fileName": "src/featureA.js",
 #       "author": "Developer One (aider)",
-#       "added": 60,
-#       "deleted": 10,
-#       "total": 70
+#       "added": 60, "deleted": 10, "total": 70
 #     },
 #     {
 #       "fileName": "src/featureB.js",
 #       "author": "Developer One (aider)",
-#       "added": 40,
-#       "deleted": 22,
-#       "total": 62
+#       "added": 40, "deleted": 22, "total": 62
 #     },
 #     {
 #       "fileName": "src/utils.js",
 #       "author": "Developer Two",
-#       "added": 80,
-#       "deleted": 15,
-#       "total": 95
+#       "added": 80, "deleted": 15, "total": 95
 #     },
 #     {
 #       "fileName": "README.md",
 #       "author": "Developer Two",
-#       "added": 23,
-#       "deleted": 22,
-#       "total": 45
+#       "added": 23, "deleted": 22, "total": 45
 #     }
 #   ]
 # }
