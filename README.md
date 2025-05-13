@@ -51,10 +51,10 @@ git commit --amend --author="$(git config user.name) (aider) <$(git config user.
 
 This will change the author of the last commit to your name with "(aider)" appended.
 
-To simplify the process of amending the last commit's author, you can set up a Git alias called `git-aimend`. Run the following command in your terminal:
+To simplify the process, you can set up a Git alias. Run the following command in your terminal:
 
 ```sh
-git config --global alias.aimend 'commit --amend --author="$(git config user.name) (aider) <$(git config user.email)>"'
+git config --global alias.aimend '!git commit --amend --author="$(git config user.name) (aider) <$(git config user.email)>"'
 ```
 
 Once set up, you can use the alias by running:
