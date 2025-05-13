@@ -292,3 +292,11 @@ Usage example:
 #   ]
 # }
 ```
+### Output Fields Description
+
+The JSON output contains the following fields:
+
+-   `ai_percentage`: (Number) The percentage of total lines changed (sum of added and deleted lines) that were contributed by AI authors (identified by `AI_MATCHER`).
+-   `ai_changes`: (Object) An object detailing the aggregated line changes (lines `added`, `deleted`, and their `total`) made by AI authors.
+-   `non_ai_changes`: (Object) An object detailing the aggregated line changes (lines `added`, `deleted`, and their `total`) made by non-AI authors.
+-   `details`: (Array of Objects) Provides a detailed breakdown of changes. Each object in the array represents the contribution of a specific `author` to a particular `fileName`, including lines `added`, `deleted`, and the `total` changes for that file by that author.
