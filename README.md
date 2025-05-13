@@ -149,6 +149,14 @@ NF == 0 || !($1 ~ /^[0-9]+$/ && $2 ~ /^[0-9]+$/) {
     next
   }
 
+  # Aggregate stats per author and file for details array
+  file_name = $3
+  # Robust key using File Separator character \034
+  key = current_author "\034" file_name
+
+  file_author_added[key] += added_lines
+  file_author_deleted[key] += deleted_lines
+
   # Lock file filtering is now done by git log pathspec,
   # so no need for awk to filter filenames here.
 
@@ -182,7 +190,41 @@ END {
   printf "    \"added\": %d,\n", non_ai_added
   printf "    \"deleted\": %d,\n", non_ai_deleted
   printf "    \"total\": %d\n", non_ai_total_changed
-  printf "  }\n"
+  printf "  },\n" # Comma added for "details"
+
+  # Details array
+  printf "  \"details\": [\n"
+  first_detail = 1
+  # Iterate over one of the arrays, keys should be consistent
+  for (key in file_author_added) {
+    if (!first_detail) {
+      printf ",\n"
+    }
+    first_detail = 0
+
+    # Split key "author\034fileName" into key_parts array
+    # key_parts[1] will be author, key_parts[2] will be fileName
+    split(key, key_parts, "\034")
+    author = key_parts[1]
+    fileName = key_parts[2]
+
+    # Escape double quotes for JSON compatibility
+    gsub(/"/, "\\\"", author)
+    gsub(/"/, "\\\"", fileName)
+
+    detail_added = file_author_added[key] + 0 # Ensure numeric
+    detail_deleted = file_author_deleted[key] + 0 # Ensure numeric
+    detail_total = detail_added + detail_deleted
+
+    printf "    {\n"
+    printf "      \"fileName\": \"%s\",\n", fileName
+    printf "      \"author\": \"%s\",\n", author
+    printf "      \"added\": %d,\n", detail_added
+    printf "      \"deleted\": %d,\n", detail_deleted
+    printf "      \"total\": %d\n", detail_total
+    printf "    }"
+  }
+  printf "\n  ]\n"
   printf "}\n"
 }
 ')
