@@ -157,9 +157,6 @@ NF == 0 || !($1 ~ /^[0-9]+$/ && $2 ~ /^[0-9]+$/) {
   file_author_added[key] += added_lines
   file_author_deleted[key] += deleted_lines
 
-  # Lock file filtering is now done by git log pathspec,
-  # so no need for awk to filter filenames here.
-
   if (is_ai_author) {
     ai_added += added_lines
     ai_deleted += deleted_lines
