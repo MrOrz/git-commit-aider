@@ -39,8 +39,17 @@ The committer information is retrieved from:
 1. Environment variables `GIT_COMMITTER_NAME` and `GIT_COMMITTER_EMAIL`, which follows [git's convention](https://git-scm.com/book/en/v2/Git-Internals-Environment-Variables).
 2. Output of `git config user.name` and `git config user.email` commands.
 
-### Alternative
+### Alternative: amend author after commit
 
+If you don't want to use this MCP server, you can also use the `git` command directly in your terminal.
+
+You can proceed with normal commit first, and then use the following git command to change the author of the last commit:
+
+```sh
+git commit --amend --author="$(git config user.name) (aider) <$(git config user.email)>"
+```
+
+This will change the author of the last commit to your name with "(aider)" appended.
 
 ## Calculating AI contribution
 
