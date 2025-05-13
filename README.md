@@ -51,6 +51,18 @@ git commit --amend --author="$(git config user.name) (aider) <$(git config user.
 
 This will change the author of the last commit to your name with "(aider)" appended.
 
+To simplify the process of amending the last commit's author, you can set up a Git alias called `git-aimend`. Run the following command in your terminal:
+
+```sh
+git config --global alias.aimend 'commit --amend --author="$(git config user.name) (aider) <$(git config user.email)>"'
+```
+
+Once set up, you can use the alias by running:
+
+```sh
+git aimend
+```
+
 ## Calculating AI contribution
 
 Commits with "(aider)" can be picked up by [`aider --stats`](https://github.com/Aider-AI/aider/pull/2883) command, which will show you the contribution of AI in your codebase.
@@ -207,7 +219,7 @@ END {
 
     printf "    {\n"
     printf "      \"fileName\": \"%s\",\n", fileName
-    printf "      \"author\": \"%s\",\n", author
+    printf "      \"author\": \"%s\", \"isAI\": %s,\n", author, (index(author, ai_matcher) > 0 ? "true" : "false")
     printf "      \"added\": %d, \"deleted\": %d, \"total\": %d\n", detail_added, detail_deleted, detail_total
     printf "    }"
   }
