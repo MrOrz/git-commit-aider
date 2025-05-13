@@ -55,7 +55,7 @@ This will change the author of the last commit to your name with "(aider)" appen
 
 Commits with "(aider)" can be picked up by [`aider --stats`](https://github.com/Aider-AI/aider/pull/2883) command, which will show you the contribution of AI in your codebase.
 
-Alternatively, you can use the following script to calculate the contribution of AI in your codebase.
+Alternatively, you can use the following script to calculate the contribution of AI in your codebase, measured in lines of code (added, deleted, and total changes).
 
 ```sh
 #!/bin/bash
