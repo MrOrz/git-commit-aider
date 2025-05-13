@@ -81,21 +81,23 @@ LOCKFILE_PATTERNS=(
 
 # --- Helper Functions ---
 function print_usage() {
-  echo "Usage: $0 <COMMIT_A> <COMMIT_B>"
-  echo "  <COMMIT_A>: The starting commit SHA (exclusive)."
-  echo "  <COMMIT_B>: The ending commit SHA (inclusive)."
-  echo "Example: $0 HEAD~5 HEAD"
+  echo "Usage: $0 <REVISION_RANGE>"
+  echo "  <REVISION_RANGE>: The revision range to analyze (e.g., HEAD~5..HEAD, my-branch, commit_sha)."
+  echo "  Refer to 'git help log' or 'git help revisions' for more range options."
+  echo "Example: $0 HEAD~5..HEAD"
+  echo "Example: $0 origin..HEAD"
+  echo "Example: $0 my-feature-branch"
+  echo "Example: $0 abcdef1..fedcba2"
 }
 
 # --- Argument Parsing ---
-if [ "$#" -ne 2 ]; then
-  echo "Error: Incorrect number of arguments."
+if [ "$#" -ne 1 ]; then
+  echo "Error: Incorrect number of arguments. Please provide a single revision range."
   print_usage
   exit 1
 fi
 
-COMMIT_A="$1"
-COMMIT_B="$2"
+REVISION_RANGE="$1"
 
 # --- Main Logic ---
 
@@ -105,9 +107,10 @@ for pattern in "${LOCKFILE_PATTERNS[@]}"; do
   pathspec_args+=(":(exclude)$pattern")
 done
 
-git_log_output=$(git log "$COMMIT_A".."$COMMIT_B" --numstat --pretty="format:AuthorName:%an" -- "${pathspec_args[@]}")
+git_log_output=$(git log "$REVISION_RANGE" --numstat --pretty="format:AuthorName:%an" -- "${pathspec_args[@]}")
 
-# Note: You may echo `git_log_output` to check the calculation for each commit.
+# DEBUG: Uncomment to check the calculation for each commit.
+# echo "$git_log_output"
 
 # Process the log output with awk
 result_json=$(echo "$git_log_output" | awk -v ai_matcher="$AI_MATCHER" '
@@ -191,20 +194,32 @@ echo "$result_json"
 Usage example:
 
 ```sh
-# Assume the script is saved as `calculate_ai_contribution.sh`
+# Assume the script is saved as `calculate_ai_contribution.sh` and is executable (chmod +x calculate_ai_contribution.sh)
 
-bash calculate_ai_contribution.sh 90a5fcd4 HEAD
-{
-  "ai_percentage": 48.53,
-  "ai_changes": {
-    "added": 100,
-    "deleted": 32,
-    "total": 132
-  },
-  "non_ai_changes": {
-    "added": 103,
-    "deleted": 37,
-    "total": 140
-  }
-}
+# Example 1: Analyze the last 5 commits
+./calculate_ai_contribution.sh HEAD~5..HEAD
+
+# Example 2: Analyze commits between a specific commit and HEAD
+./calculate_ai_contribution.sh 90a5fcd4..HEAD
+
+# Example 3: Analyze all commits on a feature branch not yet in main
+./calculate_ai_contribution.sh main..my-feature-branch
+
+# Example 4: Analyze commits between two tags
+./calculate_ai_contribution.sh v1.0..v1.1
+
+# Example output (will vary based on your repository and range):
+# {
+#   "ai_percentage": 48.53,
+#   "ai_changes": {
+#     "added": 100,
+#     "deleted": 32,
+#     "total": 132
+#   },
+#   "non_ai_changes": {
+#     "added": 103,
+#     "deleted": 37,
+#     "total": 140
+#   }
+# }
 ```
