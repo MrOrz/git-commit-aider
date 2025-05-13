@@ -259,6 +259,36 @@ Usage example:
 #     "added": 103,
 #     "deleted": 37,
 #     "total": 140
-#   }
+#   },
+#   "details": [
+#     {
+#       "fileName": "src/featureA.js",
+#       "author": "Developer One (aider)",
+#       "added": 60,
+#       "deleted": 10,
+#       "total": 70
+#     },
+#     {
+#       "fileName": "src/featureB.js",
+#       "author": "Developer One (aider)",
+#       "added": 40,
+#       "deleted": 22,
+#       "total": 62
+#     },
+#     {
+#       "fileName": "src/utils.js",
+#       "author": "Developer Two",
+#       "added": 80,
+#       "deleted": 15,
+#       "total": 95
+#     },
+#     {
+#       "fileName": "README.md",
+#       "author": "Developer Two",
+#       "added": 23,
+#       "deleted": 22,
+#       "total": 45
+#     }
+#   ]
 # }
 ```
