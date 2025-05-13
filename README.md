@@ -63,6 +63,8 @@ Alternatively, you can use the following script to calculate the contribution of
 # Script to calculate line changes (added, deleted, total) by AI and non-AI authors
 # between two commits.
 # Output is in JSON format.
+#
+# This logic is extracted and altered from git-quick-stats.sh, MIT license.
 
 # --- Configuration ---
 # You may change the config to match your repository's convention.
