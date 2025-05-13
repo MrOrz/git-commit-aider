@@ -84,9 +84,9 @@ Alternatively, you can use the following script to calculate the contribution of
 # String to identify AI-generated commits in author names
 AI_MATCHER="(aider)"
 
-# Define patterns for lock files to be excluded
+# Define patterns for files/paths to be excluded from the calculation.
 # These will be converted to git pathspecs like ":(exclude)*package-lock.json"
-LOCKFILE_PATTERNS=(
+IGNORE_PATTERNS=(
   "*package-lock.json"
   "*.lock"
 )
@@ -115,7 +115,7 @@ REVISION_RANGE="$1"
 
 # Construct pathspec arguments for git log
 pathspec_args=()
-for pattern in "${LOCKFILE_PATTERNS[@]}"; do
+for pattern in "${IGNORE_PATTERNS[@]}"; do
   pathspec_args+=(":(exclude)$pattern")
 done
 
