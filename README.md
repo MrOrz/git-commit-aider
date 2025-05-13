@@ -60,7 +60,7 @@ Alternatively, you can use the following script to calculate the contribution of
 ```sh
 #!/bin/bash
 
-# Script to calculate line changes (added, deleted, total) by AI and non-AI authors
+# Script to calculate line changes (added, deleted, total) by AI and human authors
 # between two commits.
 # Output is in JSON format.
 #
@@ -117,8 +117,8 @@ result_json=$(echo "$git_log_output" | awk -v ai_matcher="$AI_MATCHER" '
 BEGIN {
   ai_added = 0
   ai_deleted = 0
-  non_ai_added = 0
-  non_ai_deleted = 0
+  human_added = 0
+  human_deleted = 0
   current_author = ""
   is_ai_author = 0
 }
@@ -161,15 +161,15 @@ NF == 0 || !($1 ~ /^[0-9]+$/ && $2 ~ /^[0-9]+$/) {
     ai_added += added_lines
     ai_deleted += deleted_lines
   } else {
-    non_ai_added += added_lines
-    non_ai_deleted += deleted_lines
+    human_added += added_lines
+    human_deleted += deleted_lines
   }
 }
 
 END {
   ai_total_changed = ai_added + ai_deleted
-  non_ai_total_changed = non_ai_added + non_ai_deleted
-  overall_total_changed = ai_total_changed + non_ai_total_changed
+  human_total_changed = human_added + human_deleted
+  overall_total_changed = ai_total_changed + human_total_changed
   ai_percentage = 0.00
 
   if (overall_total_changed > 0) {
@@ -183,10 +183,10 @@ END {
   printf "    \"deleted\": %d,\n", ai_deleted
   printf "    \"total\": %d\n", ai_total_changed
   printf "  },\n"
-  printf "  \"non_ai_changes\": {\n"
-  printf "    \"added\": %d,\n", non_ai_added
-  printf "    \"deleted\": %d,\n", non_ai_deleted
-  printf "    \"total\": %d\n", non_ai_total_changed
+  printf "  \"human_changes\": {\n"
+  printf "    \"added\": %d,\n", human_added
+  printf "    \"deleted\": %d,\n", human_deleted
+  printf "    \"total\": %d\n", human_total_changed
   printf "  },\n" # Comma added for "details"
 
   # Details array
@@ -255,7 +255,7 @@ Usage example:
 #     "deleted": 32,
 #     "total": 132
 #   },
-#   "non_ai_changes": {
+#   "human_changes": {
 #     "added": 103,
 #     "deleted": 37,
 #     "total": 140
@@ -298,5 +298,5 @@ The JSON output contains the following fields:
 
 -   `ai_percentage`: (Number) The percentage of total lines changed (sum of added and deleted lines) that were contributed by AI authors (identified by `AI_MATCHER`).
 -   `ai_changes`: (Object) An object detailing the aggregated line changes (lines `added`, `deleted`, and their `total`) made by AI authors.
--   `non_ai_changes`: (Object) An object detailing the aggregated line changes (lines `added`, `deleted`, and their `total`) made by non-AI authors.
+-   `human_changes`: (Object) An object detailing the aggregated line changes (lines `added`, `deleted`, and their `total`) made by human authors.
 -   `details`: (Array of Objects) Provides a detailed breakdown of changes. Each object in the array represents the contribution of a specific `author` to a particular `fileName`, including lines `added`, `deleted`, and the `total` changes for that file by that author.
