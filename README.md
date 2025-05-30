@@ -1,5 +1,7 @@
 # git-commit-aider MCP Server
 
+[![smithery badge](https://smithery.ai/badge/@MrOrz/mcp-git-commit-aider)](https://smithery.ai/server/@MrOrz/mcp-git-commit-aider)
+
 Make git commits on behalf of AI, so that you can track AI contribution in your codebase.
 
 This is a TypeScript-based MCP server that provides a tool to commit staged changes in a Git repository while appending "(aider)" to the committer's name.
@@ -21,6 +23,14 @@ With this tool installed in your code editor, you can prompt the AI by something
 This usually happens after the AI has made some changes to your codebase, so often times AI is able to provide a good commit message from the context.
 
 ## Installation
+
+### Installing via Smithery
+
+To install Git Commit Aider for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@MrOrz/mcp-git-commit-aider):
+
+```bash
+npx -y @smithery/cli install @MrOrz/mcp-git-commit-aider --client claude
+```
 
 To use this server, add its configuration to your MCP settings file.
 
